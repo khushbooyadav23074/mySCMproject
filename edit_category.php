@@ -1,0 +1,85 @@
+<?php
+	include("../includes/config.php");
+	include("../includes/validate_data.php");
+	session_start();
+	if(isset($_SESSION['admin_login'])) {
+		if($_SESSION['admin_login'] == true) {
+			$id = $_GET['id'];
+			$query_selectCategoryDetails = "SELECT * FROM categories WHERE cat_id='$id'";
+			$result_selectCategoryDetails = mysqli_query($con,$query_selectCategoryDetails);
+			$row_selectCategoryDetails = mysqli_fetch_array($result_selectCategoryDetails);
+			$categoryName = $categoryDetails = "";
+			$categoryNameErr = $requireErr = $confirmMessage = "";
+			$categoryNameHolder = $categoryDetailsHolder = "";
+			if($_SERVER['REQUEST_METHOD'] == "POST") {
+				if(!empty($_POST['txtCategoryName'])) {
+					$categoryNameHolder = $_POST['txtCategoryName'];
+					$categoryName = $_POST['txtCategoryName'];
+				}
+				if(!empty($_POST['txtCategoryDetails'])) {
+					$categoryDetails = $_POST['txtCategoryDetails'];
+					$categoryDetailsHolder = $_POST['txtCategoryDetails'];
+				}
+				if($categoryName != null) {
+					$query_UpdateCategory = "UPDATE categories SET cat_name='$categoryName',cat_details='$categoryDetails' WHERE cat_id='$id'";
+					if(mysqli_query($con,$query_UpdateCategory)) {
+						echo "<script> alert(\"Category Updated Successfully\"); </script>";
+						header('Refresh:0;url=view_category.php');
+					}
+					else {
+						$requireErr = "Updating New Category Failed";
+					}
+				}
+				else {
+					$requireErr = "* Valid Category Name is required";
+				}
+			}
+		}
+		else {
+			header('Location:../index.php');
+		}
+	}
+	else {
+		header('Location:../index.php');
+	}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Update Category </title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="../includes/main_style.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+	<?php
+		include("../includes/header.inc.php");
+		include("../includes/nav_admin.inc.php");
+		include("../includes/aside_admin.inc.php");
+	?>
+	<div class="main-content">
+	<div class="data-section">
+		<h1>Update Category</h1>
+		<form action="" method="POST" class="form">
+		<ul class="form-list">
+		<li>
+			<div class="label-block"> <label for="categoryName">Category Name</label> </div>
+			<div class="input-box"> <input type="text" id="categoryName" name="txtCategoryName" placeholder="Category Name" value="<?php echo $row_selectCategoryDetails['cat_name']; ?>" required /> </div> <span class="error_message"><?php echo $categoryNameErr; ?></span>
+		</li>
+		<li>
+			<div class="label-block"> <label for="categoryDetails">Details</label> </div>
+			<div class="input-box"><textarea id="categoryDetails" name="txtCategoryDetails" placeholder="Details"><?php echo $row_selectCategoryDetails['cat_details']; ?></textarea> </div>
+		</li>
+		<li>
+			<input type="submit" value="Update Category" class="submit_button" /> <span class="error_message"> <?php echo $requireErr; ?> </span><span class="confirm_message"> <?php echo $confirmMessage; ?> </span>
+		</li>
+		</ul>
+		</form>
+	</div>
+</div>
+	<?php
+		include("../includes/footer.inc.php");
+	?>
+</body>
+</html>
